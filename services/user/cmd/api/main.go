@@ -81,7 +81,7 @@ func main() {
 	r.Handle("/graphql", graphqlHTTPHandler)
 
 	// Prometheus metrics endpoint
-	// r.Handle("/metrics", promMetrics.Handler()) // Assuming your metrics lib provides an http.Handler
+	r.Handle("/metrics", promMetrics.Handler()) // Assuming your metrics lib provides an http.Handler
 
 	port := os.Getenv("PORT")
 	if port == "" {

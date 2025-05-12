@@ -1,0 +1,91 @@
+{
+  "uid": "product-service-dashboard-01",
+  "title": "Product Service",
+  "tags": ["product-service", "microservice"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "15s",
+  "panels": [
+    {
+      "title": "Service Instances Up",
+      "type": "stat",
+      "id": 1,
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(up{job=\"product_service\"})",
+          "legendFormat": "Running Instances",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "title": "HTTP Requests Total (Rate 5m)",
+      "type": "timeseries",
+      "id": 2,
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 5 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"product_service\"}[5m])) by (method, path, status_code)",
+          "legendFormat": "{{method}} {{path}} ({{status_code}})",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "title": "HTTP Request Duration p95 (5m)",
+      "type": "timeseries",
+      "id": 3,
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 5 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"product_service\"}[5m])) by (le, method, path))",
+          "legendFormat": "p95 {{method}} {{path}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "unit": "s"
+    }
+  ]
+}

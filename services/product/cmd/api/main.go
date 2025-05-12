@@ -72,7 +72,7 @@ func main() {
 		GraphiQL: true,
 	})
 	r.Handle("/graphql", graphqlHTTPHandler)
-	// r.Handle("/metrics", promMetrics.Handler())
+	r.Handle("/metrics", promMetrics.Handler())
 
 	port := os.Getenv("PORT")
 	if port == "" {

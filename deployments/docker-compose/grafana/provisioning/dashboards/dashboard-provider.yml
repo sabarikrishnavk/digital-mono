@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: 'Default Dashboards' # You can name this provider as you like
+    orgId: 1
+    folder: '' # Dashboards will appear in the General folder in Grafana
+    type: file
+    disableDeletion: false # Set to true to prevent users from deleting provisioned dashboards
+    editable: true # Set to false to prevent users from editing provisioned dashboards
+    options:
+      path: /etc/grafana/provisioning/dashboards # Path inside the Grafana container where dashboard JSON files are located
+      # This path will be mapped from a host directory in your docker-compose.yml,
+      # for example: ./grafana/dashboards:/etc/grafana/provisioning/dashboards

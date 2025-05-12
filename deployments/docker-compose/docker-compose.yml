@@ -5,15 +5,16 @@ services:
     image: postgres:14-alpine # Using a specific version
     container_name: digital_mono_postgres
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
-      POSTGRES_USER: omni_user      # Changed user
+      POSTGRES_USER: omni_user # Changed user
       POSTGRES_PASSWORD: strong_password # Changed password
       POSTGRES_DB: digital_mono_db
     volumes:
+      - ./postgres/initdb:/docker-entrypoint-initdb.d # Mount init scripts
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U omni_user -d digital_mono_db"]
+      test: ['CMD-SHELL', 'pg_isready -U omni_user -d digital_mono_db']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -57,22 +58,27 @@ services:
     image: prom/prometheus:v2.45.0 # Using a specific version
     container_name: digital_mono_prometheus
     ports:
-      - "9090:9090"
+      - '9090:9090'
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
       - digital_mono_network
-
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
   grafana:
     image: grafana/grafana:9.5.3 # Using a specific version
     container_name: digital_mono_grafana
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning/:/etc/grafana/provisioning/ # Mount entire provisioning folder
+        # Mount the directory containing dashboard-provider.yml
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      # Mount the directory containing your actual dashboard JSON files
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards/json_dashboards # Or whatever path you specified in dashboard-provider.yml if nested
+
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: password
