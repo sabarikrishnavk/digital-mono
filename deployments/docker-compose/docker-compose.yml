@@ -74,10 +74,17 @@ services:
       - '3000:3000'
     volumes:
       - grafana_data:/var/lib/grafana
-        # Mount the directory containing dashboard-provider.yml
+      # Mount the directory containing dashboard-provider.yml
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
       # Mount the directory containing your actual dashboard JSON files
-      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards/json_dashboards # Or whatever path you specified in dashboard-provider.yml if nested
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards # Or whatever path you specified in dashboard-provider.yml if nested
+    # If your dashboard-provider.yml points to /etc/grafana/provisioning/dashboards
+    # and your JSON files are in ./grafana/dashboards, then the above volume for JSON files
+    # should also point to /etc/grafana/provisioning/dashboards if you want them flat,
+    # or a sub-directory if you prefer.
+    # For the dashboard-provider.yml above, it expects JSON files directly in /etc/grafana/provisioning/dashboards
+    # So, a simpler volume mount for dashboards would be:
+    # - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
 
     environment:
       GF_SECURITY_ADMIN_USER: admin
@@ -89,7 +96,7 @@ services:
 
 volumes:
   postgres_data:
-  grafana_data:
+  grafana_data: {}
 
 networks:
   digital_mono_network:
