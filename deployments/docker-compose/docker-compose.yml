@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine # Using a specific version
+    container_name: digital_mono_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: omni_user      # Changed user
+      POSTGRES_PASSWORD: strong_password # Changed password
+      POSTGRES_DB: digital_mono_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omni_user -d digital_mono_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - digital_mono_network
+
+  # --- Example Service (Uncomment and adapt when 'user' service is ready) ---
+  # user_service:
+  #   build:
+  #     context: ../../services/user # Adjusted path
+  #     dockerfile: Dockerfile
+  #   container_name: user_service
+  #   ports:
+  #     - "8081:8080"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   environment:
+  #     DB_DSN: "host=postgres port=5432 user=omni_user password=strong_password dbname=digital_mono_db sslmode=disable"
+  #     JWT_SECRET: "your-super-secret-key"
+  #   networks:
+  #     - digital_mono_network
+
+  # --- Example BFF (Uncomment and adapt when 'cart' bff is ready) ---
+  # cart_bff:
+  #   build:
+  #     context: ../../bff/cart # Adjusted path
+  #     dockerfile: Dockerfile
+  #   container_name: cart_bff
+  #   ports:
+  #     - "9081:9080"
+  #   # depends_on:
+  #   #   - user_service # Add dependencies to other services as needed
+  #   environment:
+  #     USER_SERVICE_ADDR: "user_service:8080" # Example service discovery
+  #     JWT_SECRET: "your-super-secret-key"
+  #   networks:
+  #     - digital_mono_network
+
+  prometheus:
+    image: prom/prometheus:v2.45.0 # Using a specific version
+    container_name: digital_mono_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - digital_mono_network
+
+  grafana:
+    image: grafana/grafana:9.5.3 # Using a specific version
+    container_name: digital_mono_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/ # Mount entire provisioning folder
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: password
+    depends_on:
+      - prometheus
+    networks:
+      - digital_mono_network
+
+volumes:
+  postgres_data:
+  grafana_data:
+
+networks:
+  digital_mono_network:
+    driver: bridge

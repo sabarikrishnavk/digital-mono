@@ -1,0 +1,15 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  createdAt: String! # Using String for simplicity, can be custom scalar for Time
+  updatedAt: String!
+}
+
+type Query {
+  user(id: ID!): User
+}
+
+type Mutation {
+  createUser(name: String!, email: String!): User
+}
