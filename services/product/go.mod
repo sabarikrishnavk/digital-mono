@@ -10,6 +10,7 @@ require (
 	github.com/graphql-go/graphql v0.8.1
 	github.com/graphql-go/handler v0.2.4
 	github.com/lib/pq v1.10.9
+	github.com/omni-compos/digital-mono/libs/auth v0.0.0-00010101000000-000000000000
 	github.com/omni-compos/digital-mono/libs/database v0.0.0
 	github.com/omni-compos/digital-mono/libs/logger v0.0.0
 	github.com/omni-compos/digital-mono/libs/metrics v0.0.0
@@ -18,6 +19,7 @@ require (
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/prometheus/client_golang v1.22.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect

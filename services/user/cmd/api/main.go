@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/graphql-go/handler"
 	_ "github.com/lib/pq" // PostgreSQL driver
+	commonAuth "github.com/omni-compos/digital-mono/libs/auth"
 
 	commonDB "github.com/omni-compos/digital-mono/libs/database"
 	commonLogger "github.com/omni-compos/digital-mono/libs/logger"
@@ -49,14 +50,14 @@ func main() {
 	// Initialize Prometheus metrics (placeholder, replace with actual implementation)
 	promMetrics := commonMetrics.NewPrometheusMetrics("user_service", "api")
 
-	// Initialize Auth (placeholder, replace with actual implementation)
-	// authenticator := commonAuth.NewJWTAuthenticator(jwtSecret)
+	// Initialize Auth
+	authenticator := commonAuth.NewJWTAuthenticator(jwtSecret)
 
 	// Dependency Injection
 	repo := userRepo.NewPGUserRepository(db)
 	service := userService.NewUserService(repo, appLogger)
 
-	restHandler := userREST.NewUserRESTHandler(service, appLogger, promMetrics)
+	restHandler := userREST.NewUserRESTHandler(service, appLogger, promMetrics, authenticator)
 	gqlHandler, err := userGraphQL.NewUserGraphQLHandler(service, appLogger)
 	if err != nil {
 		appLogger.Error(err, "Failed to create GraphQL handler")

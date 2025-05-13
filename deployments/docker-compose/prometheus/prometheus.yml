@@ -8,8 +8,11 @@ scrape_configs:
 
   - job_name: 'product_service'
     static_configs:
-      - targets: ['host.docker.internal:8082'] # Assuming product_service metrics are on port 9102
-      #  - targets: ['product_service:8082'] # Assuming product_service metrics are on port 9102
+      - targets: ['host.docker.internal:8082'] # Assuming product_service metrics are on port 8082
+      #  - targets: ['product_service:8082'] # Assuming product_service metrics are on port 8082
+  - job_name: 'user_service'
+    static_configs:
+      - targets: ['host.docker.internal:8081']
 
   # - job_name: 'user_service' # Example: Add your services here
   #   static_configs:

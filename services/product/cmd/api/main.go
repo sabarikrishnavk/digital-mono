@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/graphql-go/handler"
 	_ "github.com/lib/pq" // PostgreSQL driver
+	commonAuth "github.com/omni-compos/digital-mono/libs/auth"
 
 	commonDB "github.com/omni-compos/digital-mono/libs/database"
 	commonLogger "github.com/omni-compos/digital-mono/libs/logger"
@@ -29,7 +30,7 @@ func main() {
 	}
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
-		jwtSecret = "your-super-secret-key-for-product-service"
+		jwtSecret = "your-super-secret-key-for-user-service"
 		log.Println("Warning: JWT_SECRET not set, using default for product service.")
 	}
 
@@ -46,7 +47,7 @@ func main() {
 	appLogger.Info("Successfully connected to database")
 
 	promMetrics := commonMetrics.NewPrometheusMetrics("product_service", "api")
-	// authenticator := commonAuth.NewJWTAuthenticator(jwtSecret)
+	authenticator := commonAuth.NewJWTAuthenticator(jwtSecret)
 
 	// Dependency Injection
 	repo := productRepo.NewPGProductRepository(db)
@@ -63,7 +64,7 @@ func main() {
 	r := mux.NewRouter()
 
 	apiRouter := r.PathPrefix("/api/v1").Subrouter()
-	// apiRouter.Use(authenticator.Middleware)
+	apiRouter.Use(authenticator.Middleware)
 	restHandler.RegisterRoutes(apiRouter)
 
 	graphqlHTTPHandler := handler.New(&handler.Config{
