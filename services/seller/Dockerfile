@@ -1,0 +1,1 @@
+FROM golang:1.21-alpine AS builder\n\nWORKDIR /app\nCOPY go.mod go.sum ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 GOOS=linux go build -o /app/server ./cmd/api/main.go\n\nFROM alpine:latest\nWORKDIR /app\nCOPY --from=builder /app/server .\n\n# Add prometheus metrics port if needed, e.g., EXPOSE 9000\nEXPOSE 8080\nCMD ["/app/server"]

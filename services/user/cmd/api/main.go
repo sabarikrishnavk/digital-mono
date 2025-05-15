@@ -9,8 +9,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/graphql-go/handler"
 	_ "github.com/lib/pq" // PostgreSQL driver
-	commonAuth "github.com/omni-compos/digital-mono/libs/auth"
 
+	commonAuth "github.com/omni-compos/digital-mono/libs/auth"
 	commonDB "github.com/omni-compos/digital-mono/libs/database"
 	commonLogger "github.com/omni-compos/digital-mono/libs/logger"
 	commonMetrics "github.com/omni-compos/digital-mono/libs/metrics"
@@ -57,7 +57,7 @@ func main() {
 	repo := userRepo.NewPGUserRepository(db)
 	service := userService.NewUserService(repo, appLogger)
 
-	restHandler := userREST.NewUserRESTHandler(service, appLogger, promMetrics, authenticator)
+	restHandler := userREST.NewUserRESTHandler(service, jwtSecret, appLogger, promMetrics)
 	gqlHandler, err := userGraphQL.NewUserGraphQLHandler(service, appLogger)
 	if err != nil {
 		appLogger.Error(err, "Failed to create GraphQL handler")
@@ -67,11 +67,17 @@ func main() {
 	// Router
 	r := mux.NewRouter()
 
+	// // REST API routes
+	// apiRouter := r.PathPrefix("/api/v1").Subrouter()
+	// // apiRouter.Use(authenticator.Middleware) // Apply JWT auth middleware
+	// restHandler.RegisterRoutes(apiRouter)
+
+	// Register public routes (like login) BEFORE applying middleware
+	restHandler.RegisterRoutes(r) // Register all routes, including /login
+
 	// REST API routes
 	apiRouter := r.PathPrefix("/api/v1").Subrouter()
-	// apiRouter.Use(authenticator.Middleware) // Apply JWT auth middleware
-	restHandler.RegisterRoutes(apiRouter)
-
+	apiRouter.Use(authenticator.Middleware) 
 	// GraphQL endpoint
 	// You might want to protect this with authenticator.Middleware as well
 	graphqlHTTPHandler := handler.New(&handler.Config{

@@ -6,6 +6,7 @@ import "log" // Standard log, can be replaced with a structured logger like zero
 type Logger interface {
 	Info(message string, fields ...interface{})
 	Error(err error, message string, fields ...interface{})
+	Warn(err error, message string, fields ...interface{})
 	// Add other levels like Debug, Warn as needed
 }
 
@@ -27,4 +28,9 @@ func (l *stdLogger) Info(message string, fields ...interface{}) {
 // Error logs an error message.
 func (l *stdLogger) Error(err error, message string, fields ...interface{}) {
 	log.Printf("ERROR: %s: %v %v\n", message, err, fields)
+}
+
+// Error logs an error message.
+func (l *stdLogger) Warn(err error, message string, fields ...interface{}) {
+	log.Printf("WARN: %s: %v %v\n", message, err, fields)
 }

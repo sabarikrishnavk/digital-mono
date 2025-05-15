@@ -29,7 +29,7 @@ type Claims struct {
 
 type contextKey string
 
-const claimsContextKey contextKey = "jwtClaims"
+const ClaimsContextKey contextKey = "jwtClaims"
 
 // GenerateToken creates a new JWT token.
 func (a *JWTAuthenticator) GenerateToken(userID string, roles []string, duration time.Duration) (string, error) {
@@ -90,7 +90,17 @@ func (a *JWTAuthenticator) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), claimsContextKey, claims)
+		ctx := context.WithValue(r.Context(), ClaimsContextKey, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// GetClaimsFromContext retrieves the Claims struct from the context.
+// It returns the Claims and a boolean indicating if the claims were found.
+func GetClaimsFromContext(ctx context.Context) (*Claims, bool) {
+	claims, ok := ctx.Value(ClaimsContextKey).(*Claims)
+	if !ok || claims == nil {
+		return nil, false
+	}
+	return claims, true
 }

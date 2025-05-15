@@ -1,17 +1,19 @@
-module github.com/omni-compos/digital-mono/services/user
+module github.com/omni-compos/digital-mono/services/seller
 
 go 1.23.0
 
 toolchain go1.24.2
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/graphql-go/graphql v0.8.1
 	github.com/graphql-go/handler v0.2.4
 	github.com/lib/pq v1.10.9
 	github.com/omni-compos/digital-mono/libs/auth v0.0.0-00010101000000-000000000000
-	github.com/omni-compos/digital-mono/libs/database v0.0.0
+	github.com/omni-compos/digital-mono/libs/database v0.0.0-00010101000000-000000000000
+	github.com/omni-compos/digital-mono/libs/localization v0.0.0
 	github.com/omni-compos/digital-mono/libs/logger v0.0.0
 	github.com/omni-compos/digital-mono/libs/metrics v0.0.0
 )
@@ -29,7 +31,8 @@ require (
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
@@ -37,6 +40,7 @@ require (
 replace (
 	github.com/omni-compos/digital-mono/libs/auth => ../../libs/auth
 	github.com/omni-compos/digital-mono/libs/database => ../../libs/database
+	github.com/omni-compos/digital-mono/libs/localization => ../../libs/localization
 	github.com/omni-compos/digital-mono/libs/logger => ../../libs/logger
 	github.com/omni-compos/digital-mono/libs/metrics => ../../libs/metrics
 )

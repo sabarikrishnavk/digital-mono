@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/omni-compos/digital-mono/libs/logger"
@@ -38,7 +39,7 @@ func (h *ProductRESTHandler) CreateProductHandler(w http.ResponseWriter, r *http
 	var req CreateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusBadRequest))
+		h.metrics.IncRequestsTotal("create-product",  "rest",  strconv.Itoa(http.StatusBadRequest))
 		return
 	}
 
@@ -46,14 +47,14 @@ func (h *ProductRESTHandler) CreateProductHandler(w http.ResponseWriter, r *http
 	if err != nil {
 		h.logger.Error(err, "Failed to create product")
 		http.Error(w, "Failed to create product", http.StatusInternalServerError)
-		h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusInternalServerError))
+		h.metrics.IncRequestsTotal(r.URL.Path,  "rest",strconv.Itoa(http.StatusInternalServerError))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(product)
-	h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusCreated))
+	h.metrics.IncRequestsTotal(r.URL.Path,  "rest",  strconv.Itoa(http.StatusCreated))
 }
 
 func (h *ProductRESTHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,16 +64,16 @@ func (h *ProductRESTHandler) GetProductHandler(w http.ResponseWriter, r *http.Re
 	product, err := h.service.GetProduct(r.Context(), id)
 	if err != nil {
 		http.Error(w, "Failed to get product", http.StatusInternalServerError)
-		h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusInternalServerError))
+		h.metrics.IncRequestsTotal(r.URL.Path, "rest",  strconv.Itoa(http.StatusInternalServerError))
 		return
 	}
 	if product == nil {
 		http.Error(w, "Product not found", http.StatusNotFound)
-		h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusNotFound))
+		h.metrics.IncRequestsTotal(r.URL.Path, "rest", strconv.Itoa(http.StatusNotFound))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(product)
-	h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusOK))
+	h.metrics.IncRequestsTotal(r.URL.Path,  "rest",  strconv.Itoa(http.StatusOK))
 }

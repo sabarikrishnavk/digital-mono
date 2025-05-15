@@ -9,4 +9,14 @@ type User struct {
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	Roles	  []string  `json:"roles"`
+}
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// LoginResponse represents the response body for the login endpoint.
+type LoginResponse struct {
+	Token string `json:"token"`
 }
