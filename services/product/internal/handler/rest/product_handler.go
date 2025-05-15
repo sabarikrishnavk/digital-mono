@@ -36,10 +36,11 @@ type CreateProductRequest struct {
 }
 
 func (h *ProductRESTHandler) CreateProductHandler(w http.ResponseWriter, r *http.Request) {
+	h.metrics.IncRequestsTotal("create-product",  "rest")
 	var req CreateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		h.metrics.IncRequestsTotal("create-product",  "rest",  strconv.Itoa(http.StatusBadRequest))
+		h.metrics.IncResponsesTotal("create-product",  "rest",  strconv.Itoa(http.StatusBadRequest))
 		return
 	}
 
@@ -47,33 +48,34 @@ func (h *ProductRESTHandler) CreateProductHandler(w http.ResponseWriter, r *http
 	if err != nil {
 		h.logger.Error(err, "Failed to create product")
 		http.Error(w, "Failed to create product", http.StatusInternalServerError)
-		h.metrics.IncRequestsTotal(r.URL.Path,  "rest",strconv.Itoa(http.StatusInternalServerError))
+		h.metrics.IncResponsesTotal(r.URL.Path,  "rest",strconv.Itoa(http.StatusInternalServerError))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(product)
-	h.metrics.IncRequestsTotal(r.URL.Path,  "rest",  strconv.Itoa(http.StatusCreated))
+	h.metrics.IncResponsesTotal(r.URL.Path,  "rest",  strconv.Itoa(http.StatusCreated))
 }
 
 func (h *ProductRESTHandler) GetProductHandler(w http.ResponseWriter, r *http.Request) {
+	h.metrics.IncRequestsTotal("get-product",  "rest")
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	product, err := h.service.GetProduct(r.Context(), id)
 	if err != nil {
 		http.Error(w, "Failed to get product", http.StatusInternalServerError)
-		h.metrics.IncRequestsTotal(r.URL.Path, "rest",  strconv.Itoa(http.StatusInternalServerError))
+		h.metrics.IncResponsesTotal(r.URL.Path, "rest",  strconv.Itoa(http.StatusInternalServerError))
 		return
 	}
 	if product == nil {
 		http.Error(w, "Product not found", http.StatusNotFound)
-		h.metrics.IncRequestsTotal(r.URL.Path, "rest", strconv.Itoa(http.StatusNotFound))
+		h.metrics.IncResponsesTotal(r.URL.Path, "rest", strconv.Itoa(http.StatusNotFound))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(product)
-	h.metrics.IncRequestsTotal(r.URL.Path,  "rest",  strconv.Itoa(http.StatusOK))
+	h.metrics.IncResponsesTotal(r.URL.Path,  "rest",  strconv.Itoa(http.StatusOK))
 }

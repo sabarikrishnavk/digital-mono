@@ -27,16 +27,6 @@ func NewUserRESTHandler(userService service.UserService, jwtSecret string, log l
 	return &UserRESTHandler{service: userService,jwtSecret: jwtSecret, logger: log, metrics: promMetrics}
 }
 
-// // RegisterRoutes registers user REST routes with the given router.
-// func (h *UserRESTHandler) RegisterRoutes(router *mux.Router) {
-// 	// Example of using metrics wrapper, if your metrics lib provides one
-// 	// createUserHandler := h.metrics.WrapHandler("create_user", http.HandlerFunc(h.CreateUserHandler))
-// 	// getUserHandler := h.metrics.WrapHandler("get_user", http.HandlerFunc(h.GetUserHandler))
-
-// 	router.HandleFunc("/users", h.CreateUserHandler).Methods(http.MethodPost)
-// 	router.HandleFunc("/users/{id}", h.GetUserHandler).Methods(http.MethodGet)
-// }
-
 type CreateUserRequest struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
@@ -46,7 +36,7 @@ func (h *UserRESTHandler) CreateUserHandler(w http.ResponseWriter, r *http.Reque
 	var req CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusBadRequest))
+		h.metrics.IncResponsesTotal("createUser", "rest", strconv.Itoa(http.StatusBadRequest))
 		return
 	}
 
@@ -54,14 +44,14 @@ func (h *UserRESTHandler) CreateUserHandler(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		h.logger.Error(err, "Failed to create user")
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
-		h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusInternalServerError))
+		h.metrics.IncResponsesTotal("createUser", "rest", strconv.Itoa(http.StatusInternalServerError))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
-	h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusCreated))
+	h.metrics.IncResponsesTotal("createUser", "rest", strconv.Itoa(http.StatusCreated))
 }
 
 func (h *UserRESTHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,34 +61,30 @@ func (h *UserRESTHandler) GetUserHandler(w http.ResponseWriter, r *http.Request)
 	user, err := h.service.GetUser(r.Context(), id)
 	if err != nil { // Handle not found specifically if service returns a specific error
 		http.Error(w, "Failed to get user", http.StatusInternalServerError)
-		h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusInternalServerError))
+		h.metrics.IncResponsesTotal("getUser", "rest", strconv.Itoa(http.StatusInternalServerError))
 		return
 	}
 	if user == nil {
 		http.Error(w, "User not found", http.StatusNotFound)
-		h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusNotFound))
+		h.metrics.IncResponsesTotal("getUser", "rest", strconv.Itoa(http.StatusNotFound))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
-	h.metrics.IncRequestsTotal(r.URL.Path, r.Method, http.StatusText(http.StatusOK))
+	h.metrics.IncResponsesTotal("getUser", "rest", strconv.Itoa(http.StatusOK))
 }
 
+ 
 // RegisterRoutes registers the REST endpoints for users.
 func (h *UserRESTHandler) RegisterRoutes(r *mux.Router) {
 	// Public route for login (does not require JWT middleware)
-	// Public routes
+	// Public routes 
+
+	r.HandleFunc("/login", h.Login).Methods(http.MethodPost) 
 }
-
-	// API routes requiring JWT authentication middleware
-	// The middleware should be applied to the router *before* these routes are registered
-	// In main.go, we'll create a subrouter for authenticated routes.
-
-// RegisterProtectedRoutes registers routes that require authentication.
-// These should be registered on a router or subrouter that has the JWT middleware applied.
+	// RegisterRoutes registers the REST endpoints for users.
 func (h *UserRESTHandler) RegisterProtectedRoutes(r *mux.Router) {
-
 	r.HandleFunc("/users", h.CreateUserHandler).Methods(http.MethodPost)
 	r.HandleFunc("/users/{id}", h.GetUserHandler).Methods(http.MethodGet)
 	// r.HandleFunc("/users", h.CreateUser).Methods("POST")
@@ -110,7 +96,8 @@ func (h *UserRESTHandler) RegisterProtectedRoutes(r *mux.Router) {
 
 // Login handles POST /login requests.
 func (h *UserRESTHandler) Login(w http.ResponseWriter, r *http.Request) {
-	h.metrics.IncRequestsTotal("login", "rest",strconv.Itoa(http.StatusOK))
+	h.logger.Info("Authentication 0")
+	h.metrics.IncRequestsTotal("login", "rest") // Corrected: 2 arguments
 	timer := h.metrics.NewRequestDurationTimer("login", "rest")
 	defer timer.ObserveDuration()
 
@@ -131,10 +118,13 @@ func (h *UserRESTHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.logger.Info("Authentication 1")
 	// Generate JWT token
 	// Use a reasonable expiration time, e.g., 24 hours
 
 	authenticator := commonAuth.NewJWTAuthenticator(h.jwtSecret)
+
+	h.logger.Info("Authentication 2");
 	token, err := authenticator.GenerateToken(user.ID, user.Roles, 24*time.Hour)
 	if err != nil {
 		h.logger.Error(err, "Failed to generate JWT token for user", "userID", user.ID)
@@ -142,6 +132,7 @@ func (h *UserRESTHandler) Login(w http.ResponseWriter, r *http.Request) {
 		h.metrics.IncResponsesTotal("login", "rest", strconv.Itoa(http.StatusInternalServerError))
 		return
 	}
+	h.logger.Info("Authentication 2");
 
 	// Return the token
 	w.Header().Set("Content-Type", "application/json")

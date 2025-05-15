@@ -10,7 +10,6 @@ import (
 	"github.com/graphql-go/handler"
 	_ "github.com/lib/pq" // PostgreSQL driver
 
-	commonAuth "github.com/omni-compos/digital-mono/libs/auth"
 	commonDB "github.com/omni-compos/digital-mono/libs/database"
 	commonLogger "github.com/omni-compos/digital-mono/libs/logger"
 	commonMetrics "github.com/omni-compos/digital-mono/libs/metrics"
@@ -51,7 +50,7 @@ func main() {
 	promMetrics := commonMetrics.NewPrometheusMetrics("user_service", "api")
 
 	// Initialize Auth
-	authenticator := commonAuth.NewJWTAuthenticator(jwtSecret)
+	// authenticator := commonAuth.NewJWTAuthenticator(jwtSecret)
 
 	// Dependency Injection
 	repo := userRepo.NewPGUserRepository(db)
@@ -73,11 +72,19 @@ func main() {
 	// restHandler.RegisterRoutes(apiRouter)
 
 	// Register public routes (like login) BEFORE applying middleware
-	restHandler.RegisterRoutes(r) // Register all routes, including /login
+	// restHandler.RegisterRoutes(r) // Register all routes, including /login
 
+	// restHandler.RegisterRoutes(r) // Register all routes, including /login
 	// REST API routes
 	apiRouter := r.PathPrefix("/api/v1").Subrouter()
-	apiRouter.Use(authenticator.Middleware) 
+	restHandler.RegisterRoutes(apiRouter)
+	// apiRouter.Use(authenticator.Middleware) 
+	// restHandler.RegisterProtectedRoutes(apiRouter) // Register all routes, including /login
+
+
+	// Register public routes (like login) BEFORE applying middleware
+ 
+
 	// GraphQL endpoint
 	// You might want to protect this with authenticator.Middleware as well
 	graphqlHTTPHandler := handler.New(&handler.Config{
