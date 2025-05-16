@@ -119,13 +119,13 @@ type promTimer struct {
 // ObserveDuration records the elapsed time.
 func (pt *promTimer) ObserveDuration() {
 	duration := time.Since(pt.start).Seconds()
-	// fmt.Printf("Metrics: Observing duration %.4f seconds\n", duration)
+	fmt.Printf("Metrics: Observing duration %.4f seconds\n", duration)
 	pt.observer.Observe(duration)
 }
 
 // NewRequestDurationTimer starts a timer for a given operation and handler type.
 func (pm *promMetrics) NewRequestDurationTimer(operation, handlerType string) RequestDurationTimer {
-	// fmt.Printf("Metrics (%s - %s): Starting timer for operation: %s, handler_type: %s\n", pm.serviceName, pm.subsystem, operation, handlerType)
+	fmt.Printf("Metrics (%s - %s): Starting timer for operation: %s, handler_type: %s\n", pm.serviceName, pm.subsystem, operation, handlerType)
 	observer := pm.requestDuration.WithLabelValues(operation, handlerType)
 	return &promTimer{
 		start: time.Now(),

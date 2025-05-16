@@ -81,10 +81,7 @@ func (h *UserRESTHandler) RegisterRoutes(r *mux.Router) {
 	// Public route for login (does not require JWT middleware)
 	// Public routes 
 
-	r.HandleFunc("/login", h.Login).Methods(http.MethodPost) 
-}
-	// RegisterRoutes registers the REST endpoints for users.
-func (h *UserRESTHandler) RegisterProtectedRoutes(r *mux.Router) {
+	r.HandleFunc("/login", h.Login).Methods(http.MethodPost)  
 	r.HandleFunc("/users", h.CreateUserHandler).Methods(http.MethodPost)
 	r.HandleFunc("/users/{id}", h.GetUserHandler).Methods(http.MethodGet)
 	// r.HandleFunc("/users", h.CreateUser).Methods("POST")
@@ -117,22 +114,19 @@ func (h *UserRESTHandler) Login(w http.ResponseWriter, r *http.Request) {
 		h.metrics.IncResponsesTotal("login", "rest", strconv.Itoa(http.StatusUnauthorized))
 		return
 	}
-
-	h.logger.Info("Authentication 1")
+ 
 	// Generate JWT token
 	// Use a reasonable expiration time, e.g., 24 hours
 
 	authenticator := commonAuth.NewJWTAuthenticator(h.jwtSecret)
-
-	h.logger.Info("Authentication 2");
+ 
 	token, err := authenticator.GenerateToken(user.ID, user.Roles, 24*time.Hour)
 	if err != nil {
 		h.logger.Error(err, "Failed to generate JWT token for user", "userID", user.ID)
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		h.metrics.IncResponsesTotal("login", "rest", strconv.Itoa(http.StatusInternalServerError))
 		return
-	}
-	h.logger.Info("Authentication 2");
+	} 
 
 	// Return the token
 	w.Header().Set("Content-Type", "application/json")

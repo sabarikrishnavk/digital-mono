@@ -12,7 +12,7 @@ require (
 	github.com/graphql-go/handler v0.2.4
 	github.com/lib/pq v1.10.9
 	github.com/omni-compos/digital-mono/libs/auth v0.0.0-00010101000000-000000000000
-	github.com/omni-compos/digital-mono/libs/database v0.0.0-00010101000000-000000000000
+	github.com/omni-compos/digital-mono/libs/database v0.0.0
 	github.com/omni-compos/digital-mono/libs/localization v0.0.0
 	github.com/omni-compos/digital-mono/libs/logger v0.0.0
 	github.com/omni-compos/digital-mono/libs/metrics v0.0.0

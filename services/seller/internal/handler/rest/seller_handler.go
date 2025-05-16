@@ -31,16 +31,19 @@ func NewSellerRESTHandler(service service.SellerService, logger logger.Logger, m
 }
 
 // RegisterRoutes registers the REST endpoints for sellers.
-func (h *SellerRESTHandler) RegisterRoutes(r *mux.Router) {
-	r.HandleFunc("/sellers", h.CreateSeller).Methods("POST")
-	r.HandleFunc("/sellers/{id}", h.GetSellerByID).Methods("GET")
-	r.HandleFunc("/sellers/{id}", h.UpdateSeller).Methods("PUT")
-	r.HandleFunc("/sellers/{id}", h.DeleteSeller).Methods("DELETE")
-	r.HandleFunc("/sellers", h.ListSellers).Methods("GET")
+func (h *SellerRESTHandler) RegisterRoutes(router *mux.Router) {
+
+	router.HandleFunc("/sellers", h.ListSellers).Methods(http.MethodGet) 
+	router.HandleFunc("/sellers", h.CreateSeller).Methods(http.MethodPost) 
+	router.HandleFunc("/sellers/{id}", h.GetSellerByID).Methods(http.MethodGet)
+	router.HandleFunc("/sellers/{id}", h.UpdateSeller).Methods(http.MethodPut)
+	router.HandleFunc("/sellers/{id}", h.DeleteSeller).Methods(http.MethodDelete) 
+
 }
 
 // CreateSeller handles POST /sellers
-func (h *SellerRESTHandler) CreateSeller(w http.ResponseWriter, r *http.Request) {
+func (h *SellerRESTHandler) CreateSeller(w http.ResponseWriter, r *http.Request) {  
+	// h.logger.Info("Entering CreateSeller handler", "method", r.Method, "path", r.URL.Path)
 	h.metrics.IncRequestsTotal("create_seller", "rest")  
 	timer := h.metrics.NewRequestDurationTimer("create_seller", "rest")
 	defer timer.ObserveDuration() 
@@ -79,6 +82,7 @@ func (h *SellerRESTHandler) CreateSeller(w http.ResponseWriter, r *http.Request)
 
 // GetSellerByID handles GET /sellers/{id}
 func (h *SellerRESTHandler) GetSellerByID(w http.ResponseWriter, r *http.Request) {
+	// h.logger.Info("Entering GetSellerByID handler", "method", r.Method, "path", r.URL.Path)
 	h.metrics.IncRequestsTotal("get_seller_by_id", "rest")
 	timer := h.metrics.NewRequestDurationTimer("get_seller_by_id", "rest")
 	defer timer.ObserveDuration()
@@ -107,6 +111,7 @@ func (h *SellerRESTHandler) GetSellerByID(w http.ResponseWriter, r *http.Request
 
 // UpdateSeller handles PUT /sellers/{id}
 func (h *SellerRESTHandler) UpdateSeller(w http.ResponseWriter, r *http.Request) {
+	// h.logger.Info("Entering UpdateSeller handler", "method", r.Method, "path", r.URL.Path)
 	h.metrics.IncRequestsTotal("update_seller", "rest")
 	timer := h.metrics.NewRequestDurationTimer("update_seller", "rest")
 	defer timer.ObserveDuration()
@@ -152,6 +157,7 @@ func (h *SellerRESTHandler) UpdateSeller(w http.ResponseWriter, r *http.Request)
 
 // DeleteSeller handles DELETE /sellers/{id}
 func (h *SellerRESTHandler) DeleteSeller(w http.ResponseWriter, r *http.Request) {
+	// h.logger.Info("Entering DeleteSeller handler", "method", r.Method, "path", r.URL.Path)
 	h.metrics.IncRequestsTotal("delete_seller", "rest")
 	timer := h.metrics.NewRequestDurationTimer("delete_seller", "rest")
 	defer timer.ObserveDuration()
@@ -179,8 +185,9 @@ func (h *SellerRESTHandler) DeleteSeller(w http.ResponseWriter, r *http.Request)
 
 // ListSellers handles GET /sellers
 func (h *SellerRESTHandler) ListSellers(w http.ResponseWriter, r *http.Request) {
-	h.metrics.IncRequestsTotal("list_sellers", "rest")
-	timer := h.metrics.NewRequestDurationTimer("list_sellers", "rest")
+	// h.logger.Info("Entering ListSellers handler", "method", r.Method, "path", r.URL.Path)
+	h.metrics.IncRequestsTotal("list_seller-s", "rest")
+	timer := h.metrics.NewRequestDurationTimer("list_seller-s", "rest")
 	defer timer.ObserveDuration()
 
 	// Get pagination parameters from query string
