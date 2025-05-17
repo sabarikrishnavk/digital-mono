@@ -54,6 +54,22 @@ services:
   #   networks:
   #     - digital_mono_network
 
+  api_gateway:
+    build:
+      context: ../../api-gateway # Path to the api-gateway directory
+      dockerfile: Dockerfile
+    container_name: digital_mono_api_gateway
+    ports:
+      - '8080:8080'
+    depends_on:
+      # - user_service # Uncomment when user_service is active
+      # - cart_bff     # Uncomment when cart_bff is active
+      - postgres # Example: if gateway needs to wait for DB for some reason (unlikely for pure gateway)
+    networks:
+      - digital_mono_network
+    volumes:
+      - ../../api-gateway/krakend.json:/etc/krakend/krakend.json # For live-reloading krakend config (if krakend supports it or for easy inspection)
+
   prometheus:
     image: prom/prometheus:v2.45.0 # Using a specific version
     container_name: digital_mono_prometheus

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: digital-mono
+spec:
+  selector:
+    app: user-service
+  ports:
+    - protocol: TCP
+      port: 8080 # Port other services will use to reach user-service
+      targetPort: 8080 # Container port

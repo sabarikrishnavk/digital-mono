@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: digital-mono
+  labels:
+    app: api-gateway
+spec:
+  replicas: 2 # Example: run 2 replicas
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: krakend
+          image: devopsfaith/krakend:2.6.1 # Use the same image as in Dockerfile, or your custom built image if you push it
+          # If you build and push your api-gateway image:
+          # image: your-registry/digital-mono-api-gateway:latest
+          ports:
+            - containerPort: 8080
+          command: ['krakend', 'run', '-d', '-c', '/etc/krakend/krakend.json']
+          volumeMounts:
+            - name: krakend-config-volume
+              mountPath: /etc/krakend
+          readinessProbe:
+            httpGet:
+              path: /__health # KrakenD default health check endpoint
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: krakend-config-volume
+          configMap:
+            name: krakend-config

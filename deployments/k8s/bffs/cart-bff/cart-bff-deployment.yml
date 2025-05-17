@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-bff
+  namespace: digital-mono
+  labels:
+    app: cart-bff
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-bff
+  template:
+    metadata:
+      labels:
+        app: cart-bff
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9080'
+    spec:
+      containers:
+        - name: cart-bff
+          image: your-repo/cart-bff:latest # REPLACE with your actual image
+          ports:
+            - containerPort: 9080 # Internal port of the BFF
+          env:
+            - name: USER_SERVICE_ADDR
+              value: 'user-service.digital-mono.svc.cluster.local:8080'
+            - name: JWT_SECRET
+              value: 'your-super-secret-key-from-k8s-secret-bff' # Use K8s secrets
+          # Add readiness/liveness probes
+          readinessProbe:
+            httpGet:
+              path: /health # Assuming a /health endpoint
+              port: 9080
+            initialDelaySeconds: 15
+            periodSeconds: 20

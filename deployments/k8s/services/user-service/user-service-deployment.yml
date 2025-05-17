@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: digital-mono
+  labels:
+    app: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+        prometheus.io/scrape: 'true' # Annotation for Prometheus to scrape
+        prometheus.io/port: '8080' # Port Prometheus should scrape (adjust if metrics are on different port)
+    spec:
+      containers:
+        - name: user-service
+          image: your-repo/user-service:latest # REPLACE with your actual image
+          ports:
+            - containerPort: 8080 # Internal port of the service
+          env:
+            - name: DB_DSN
+              value: 'host=postgres.digital-mono.svc.cluster.local port=5432 user=omni_user password=strong_password dbname=digital_mono_db sslmode=disable'
+            - name: JWT_SECRET
+              value: 'your-super-secret-key-from-k8s-secret' # Use K8s secrets for this
+          # Add readiness/liveness probes
+          readinessProbe:
+            httpGet:
+              path: /health # Assuming a /health endpoint
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20

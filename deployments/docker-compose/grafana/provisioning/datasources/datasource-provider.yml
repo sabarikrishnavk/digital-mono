@@ -1,0 +1,10 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://digital-mono-prometheus:9090 # For Docker Compose
+    # For K8s, this will be http://prometheus.digital-mono.svc.cluster.local:9090
+    isDefault: true
+    editable: true

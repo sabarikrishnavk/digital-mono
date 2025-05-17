@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: digital-mono
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:9.5.3
+          ports:
+            - containerPort: 3000
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              value: 'admin'
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: 'password' # Consider using a Secret for production
+          volumeMounts:
+            - name: grafana-storage
+              mountPath: /var/lib/grafana
+            - name: grafana-datasources-provisioning
+              mountPath: /etc/grafana/provisioning/datasources
+            - name: grafana-dashboards-provisioning-provider
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: grafana-dashboards-json
+              mountPath: /var/lib/grafana/dashboards # Must match path in dashboard-provider.yml
+      volumes:
+        - name: grafana-storage
+          persistentVolumeClaim:
+            claimName: grafana-data-pvc
+        - name: grafana-datasources-provisioning
+          configMap:
+            name: grafana-datasources
+        - name: grafana-dashboards-provisioning-provider
+          configMap:
+            name: grafana-dashboard-provider
+        - name: grafana-dashboards-json
+          configMap:
+            name: grafana-dashboards-json

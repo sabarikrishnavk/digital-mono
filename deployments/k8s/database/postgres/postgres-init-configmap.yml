@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: digital-mono
+data:
+  init.sql: |
+    -- Placeholder init.sql
+    -- Create tables or perform initial setup if needed
+    -- Example:
+    -- CREATE TABLE IF NOT EXISTS example_table (id SERIAL PRIMARY KEY, name VARCHAR(255));

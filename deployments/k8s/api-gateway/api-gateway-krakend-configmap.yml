@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: krakend-config
+  namespace: digital-mono
+data:
+  krakend.json: |
+    {
+      "version": 3,
+      "name": "Digital Mono API Gateway - K8s",
+      "port": 8080,
+      "timeout": "3000ms",
+      "cache_ttl": "300s",
+      "output_encoding": "json",
+      "extra_config": {
+        "telemetry/logging": {
+          "level": "INFO",
+          "prefix": "[KRAKEND-K8S]",
+          "syslog": false,
+          "stdout": true
+        },
+        "security/cors": {
+          "allow_origins": ["*"],
+          "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+          "allow_headers": ["Origin", "Authorization", "Content-Type", "Accept"],
+          "expose_headers": ["Content-Length"],
+          "max_age": "12h",
+          "allow_credentials": true
+        }
+      },
+      "endpoints": [
+        {
+          "endpoint": "/api/users/{id}",
+          "method": "GET",
+          "output_encoding": "json",
+          "backend": [
+            {
+              "url_pattern": "/users/{id}",
+              "host": [
+                "http://user-service.digital-mono.svc.cluster.local:8080"
+              ],
+              "method": "GET"
+            }
+          ]
+        },
+        {
+          "endpoint": "/api/cart",
+          "method": "GET",
+          "output_encoding": "json",
+          "backend": [
+            {
+              "url_pattern": "/cart",
+              "host": [
+                "http://cart-bff.digital-mono.svc.cluster.local:9080"
+              ],
+              "method": "GET"
+            }
+          ]
+        },
+        {
+          "endpoint": "/graphql",
+          "method": "POST",
+          "backend": [
+            {
+              "url_pattern": "/graphql",
+              "host": ["http://your-graphql-service.digital-mono.svc.cluster.local:4000"],
+              "method": "POST"
+            }
+          ]
+        }
+      ]
+    }
